@@ -1,0 +1,70 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Subscription Details{% endblock %}
+
+{% block body %}
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-2xl mx-auto">
+            <div class="flex justify-between items-center mb-8">
+                <h1 class="text-3xl font-bold">Subscription Details</h1>
+                <div class="space-x-4">
+                    <a href="{{ path('app_subscription_update', {'id': subscription.id}) }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        Update Plan
+                    </a>
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <form method="post" action="{{ path('app_subscription_cancel', {'id': subscription.id}) }}" class="inline" onsubmit="return confirm('Are you sure you want to cancel this subscription?');">
+                            <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                Cancel Subscription
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <dl class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Plan</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ subscription.planId }}</dd>
+                    </div>
+
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Status</dt>
+                        <dd class="mt-1">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                {% if subscription.status == subscription_status_active %}
+                                    bg-green-100 text-green-800
+                                {% elseif subscription.status == 'canceled' %}
+                                    bg-red-100 text-red-800
+                                {% else %}
+                                    bg-gray-100 text-gray-800
+                                {% endif %}">
+                                {{ subscription.status|title }}
+                            </span>
+                        </dd>
+                    </div>
+
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Current Period Start</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ subscription.currentPeriodStart|date('F j, Y') }}</dd>
+                    </div>
+
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Current Period End</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ subscription.currentPeriodEnd|date('F j, Y') }}</dd>
+                    </div>
+
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Created At</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ subscription.createdAt|date('F j, Y H:i:s') }}</dd>
+                    </div>
+
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Last Updated</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ subscription.updatedAt|date('F j, Y H:i:s') }}</dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+    </div>
+{% endblock %} 
