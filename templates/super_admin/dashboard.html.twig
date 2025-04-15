@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Super Admin Dashboard{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-12">
+            <h1>Super Admin Dashboard</h1>
+            
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h5 class="card-title">Welcome, {{ app.user.email }}</h5>
+                    <p class="card-text">You have super administrator privileges.</p>
+                    
+                    <div class="list-group mt-4">
+                        <a href="{{ path('app_super_admin_users') }}" class="list-group-item list-group-item-action">
+                            Manage Users
+                        </a>
+                        {# Add more super admin actions here #}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

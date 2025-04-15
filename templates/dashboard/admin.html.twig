@@ -1,0 +1,99 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block body %}
+
+    <div class="container mx-auto px-4 py-8">
+        <div>
+            <h1 class="mt-6 text-left text-3xl font-extrabold text-gray-900">Admin Dashboard</h1>
+        </div>
+    
+        <div>
+            <div class="bg-blue rounded-lg shadow p-6">
+                <div class="flex items-center"> 
+                    <a href="#" class="block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
+                        <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Total Tenants</h5>
+                        <p class="font-normal text-gray-700 dark:text-gray-400">{{ totalTenants }}</p>
+                    </a>
+                </div>
+            </div>
+
+            <div class="bg-blue rounded-lg shadow p-6">
+                <div class="flex items-center"> 
+                    <a href="#" class="block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
+                        <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Active Tenants</h5>
+                        <p class="font-normal text-gray-700 dark:text-gray-400">{{ activeTenants }}</p>
+                    </a>
+                </div>
+            </div>
+
+            <div class="bg-blue rounded-lg shadow p-6">
+                <div class="flex items-center"> 
+                    <a href="#" class="block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
+                        <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Total Users</h5>
+                        <p class="font-normal text-gray-700 dark:text-gray-400">{{ totalUsers }}</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+            <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
+                <h2 class="text-lg leading-6 font-medium text-gray-900">Tenants</h2>
+            </div>
+
+
+            <div class="w-full max-w-md p-4 bg-white border border-gray-200 rounded-lg shadow-sm sm:p-8 dark:bg-gray-800 dark:border-gray-700">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg leading-6 font-medium text-gray-900"></h2>
+                         <a href="{{ path('app_tenant_new') }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            <svg class="h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            </svg>
+                            New Tenant
+                        </a>
+                    </div>
+                
+ 
+                <div class="border-t border-gray-200">
+                    <ul role="list" class="divide-y divide-gray-200">
+                        {% for tenant in tenants %}
+                            <li class="px-4 py-4 sm:px-6">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <div class="ml-4">
+                                            <h3 class="text-lg font-medium text-gray-900">{{ tenant.name|first|upper ~ tenant.name|slice(1)|upper }}</h3>
+                                            <p class="text-sm text-gray-500">
+                                                {% for user in tenant.users %}
+                                                    {% if 'ROLE_TENANT_ADMIN' in user.roles %}
+                                                        {{ user.email }}{% if not loop.last %} {% endif %}
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex items-center space-x-4">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ tenant.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                            {{ tenant.isActive ? 'Active' : 'Inactive' }}
+                                        </span>
+                                        <a href="{{ path('app_tenant_show', {'id': tenant.id}) }}" class="text-indigo-600 hover:text-indigo-900">View Details</a>
+                                    </div>
+                                </div>
+                            </li>
+                        {% else %}
+                            <li class="px-4 py-4 sm:px-6">
+                                <p class="text-gray-500 text-center">No tenants found.</p>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>    
+</div>
+
+
+{% endblock %} 

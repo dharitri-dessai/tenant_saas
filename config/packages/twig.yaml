@@ -1,0 +1,12 @@
+twig:
+    default_path: '%kernel.project_dir%/templates'
+    
+    globals:
+        subscription_status_active: '%env(SUBSCRIPTION_STATUS_ACTIVE)%'
+        subscription_status_cancelled: '%env(SUBSCRIPTION_STATUS_CANCELLED)%'
+        subscription_status_expired: '%env(SUBSCRIPTION_STATUS_EXPIRED)%'
+        subscription_status_inactive: '%env(SUBSCRIPTION_STATUS_INACTIVE)%'
+
+when@test:
+    twig:
+        strict_variables: true
