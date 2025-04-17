@@ -17,6 +17,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\ExpressionLanguage\Expression;
+use App\Service\DataFormatterManager;
 
 #[Route('/tenant')]
 class TenantController extends AbstractController
@@ -30,10 +31,14 @@ class TenantController extends AbstractController
 
     #[Route('/', name: 'app_tenant_index', methods: ['GET'])]
     #[IsGranted('ROLE_ADMIN')]
-    public function index(TenantRepository $tenantRepository): Response
+    public function index(TenantRepository $tenantRepository, DataFormatterManager $formatterManager): Response
     {
+        $sampleData = 'example tenant';
+        $formattedData = $formatterManager->formatAll($sampleData);
+       
         return $this->render('tenant/index.html.twig', [
             'tenants' => $tenantRepository->findAll(),
+            'formattedData' => $formattedData,
         ]);
     }
 

@@ -38,7 +38,7 @@ class RegistrationController extends AbstractController
                 $tenant = $form->get('tenant')->getData();
                 $firstname = $form->get('firstname')->getData();
                 $lastname = $form->get('lastname')->getData();
-                $subdomain = $form->get('subdomain')->getData();
+                $subdomain = $form->get('subdomain')->getData() ?? '';
 
                 // Create user using the service
                 $this->userService->createUser(
@@ -56,7 +56,7 @@ class RegistrationController extends AbstractController
             } catch (CustomUserMessageAuthenticationException $e) {
                 $this->addFlash('error', $e->getMessage());
             } catch (\Exception $e) {
-                $this->addFlash('error', 'An error occurred during registration. Please try again.');
+                $this->addFlash('error', 'An error occurred during registration. Please try again.'.$e->getMessage());
             }
         }
 
