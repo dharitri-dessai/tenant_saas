@@ -9,6 +9,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use App\Event\TenantCreatedEvent;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use InvalidArgumentException;
 
 
 class UserService
@@ -50,10 +51,20 @@ class UserService
         // Set roles based on user type
         if ($userType === 'tenant') {
             $tenant = new Tenant();
-            $tenant->setName($firstname . ' ' . $lastname);
-            $tenant->setSubdomain($subdomain);
+            $tenant->setName($firstname . ' ' . $lastname);            
             $user->setTenant($tenant);
             $user->setRoles(['ROLE_TENANT_ADMIN']);
+
+            // Check if the subdomain is unique and not blank
+            if (!$subdomain) {
+                throw new CustomUserMessageAuthenticationException('Subdomain is required.');
+            }
+             $existingTenant = $this->entityManager->getRepository(Tenant::class)->findOneBy(['subdomain' => $subdomain]);
+             if ($existingTenant) {
+                 throw new CustomUserMessageAuthenticationException('The subdomain is already in use. Please choose a different subdomain.');
+             }
+
+             $tenant->setSubdomain($subdomain);
 
             // persist the tenant   
             $this->entityManager->persist($tenant);

@@ -17,6 +17,7 @@ class TenantType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        dump($options['data']);
         $builder
             ->add('name', TextType::class, [
                 'constraints' => [
@@ -36,11 +37,12 @@ class TenantType extends AbstractType
                     ]),
                 ],
             ])
+           
             ->add('email', EmailType::class, [ 
                 'mapped' => false,
-                'data' => $options['data']?->getUsers()?->filter(function($user) {
+                'data' => $options['data']?->getUsers()->count() > 0 ? $options['data']?->getUsers()?->filter(function($user) {
                     return in_array('ROLE_TENANT_ADMIN', $user->getRoles(), true);
-                })?->first()?->getEmail(),
+                })?->first()?->getEmail() : '',
                 'constraints' => [
                     new NotBlank([
                         'message' => 'Please enter an email',
