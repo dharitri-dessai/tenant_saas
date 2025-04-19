@@ -17,7 +17,8 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\ExpressionLanguage\Expression;
-use App\Service\DataFormatterManager;
+use App\Service\Formatter\DataFormatterManager;
+use App\Service\Tenant\TenantServiceSubscriber;
 
 #[Route('/tenant')]
 class TenantController extends AbstractController
@@ -165,5 +166,14 @@ class TenantController extends AbstractController
             $this->entityManager->flush();
         }
         return $this->redirectToRoute('app_tenant_index');
+    }
+
+    #[Route('/{id}/process', name: 'app_tenant_process', methods: ['GET'])]
+    public function processTenant(Tenant $tenant, TenantServiceSubscriber $subscriber): Response
+    {
+        // Process tenant-specific data
+        $subscriber->processTenantData($tenant->getId());
+
+        return new Response('Tenant data processed successfully.');
     }
 } 
