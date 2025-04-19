@@ -16,6 +16,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\ExpressionLanguage\Expression;
 use App\Service\Formatter\DataFormatterManager;
 use App\Service\Tenant\TenantServiceSubscriber;
@@ -46,38 +47,42 @@ class TenantController extends AbstractController
     #[Route('/new', name: 'app_tenant_new', methods: ['GET', 'POST'])]
     public function new(Request $request): Response
     {
-        $tenant = new Tenant();
-        $form = $this->createForm(TenantType::class, $tenant);
-        $form->handleRequest($request);
+        try {        
+            $tenant = new Tenant();
+            $form = $this->createForm(TenantType::class, $tenant);
+            $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            // Create a new user for the tenant
-            $user = new User();
-            $user->setFirstName($tenant->getName());
-            $user->setLastName($tenant->getName());
-            $user->setEmail($form->get('email')->getData());    
-            $user->setRoles(['ROLE_TENANT_ADMIN']);
-            $user->setPassword(
-                $this->passwordHasher->hashPassword(
-                    $user,
-                    '123456'
-                )
-            );
-            $user->setTenant($tenant);
-            
-            $this->entityManager->persist($user);
-            $this->entityManager->persist($tenant);
-            $this->entityManager->flush();
+            if ($form->isSubmitted() && $form->isValid()) {
+                // Create a new user for the tenant
+                $user = new User();
+                $user->setFirstName($tenant->getName());
+                $user->setLastName($tenant->getName());
+                $user->setEmail($form->get('email')->getData());    
+                $user->setRoles(['ROLE_TENANT_ADMIN']);
+                $user->setPassword(
+                    $this->passwordHasher->hashPassword(
+                        $user,
+                        '123456'
+                    )
+                );
+                $user->setTenant($tenant);
+                
+                $this->entityManager->persist($user);
+                $this->entityManager->persist($tenant);
+                $this->entityManager->flush();
 
-            $event = new TenantCreatedEvent($tenant, $this->getUser());
-            $this->eventDispatcher->dispatch($event);
+                $event = new TenantCreatedEvent($tenant, $this->getUser());
+                $this->eventDispatcher->dispatch($event);
 
-            return $this->redirectToRoute('app_tenant_index');
+                return $this->redirectToRoute('app_tenant_index');
+            }
+        } catch (AccessDeniedHttpException $e) {
+            $this->addFlash('error', 'Access Denied');
         }
 
         return $this->render('tenant/new.html.twig', [
             'tenant' => $tenant,
-            'form' => $form,
+            'form' => $form->createView(),
         ]);
     }
 
@@ -171,9 +176,14 @@ class TenantController extends AbstractController
     #[Route('/{id}/process', name: 'app_tenant_process', methods: ['GET'])]
     public function processTenant(Tenant $tenant, TenantServiceSubscriber $subscriber): Response
     {
-        // Process tenant-specific data
-        $subscriber->processTenantData($tenant->getId());
+        try {
+            // Process tenant-specific data
+            $data = $subscriber->processTenantData($tenant->getId());
 
-        return new Response('Tenant data processed successfully.');
+        } catch (\RuntimeException $e) {
+                $this->addFlash('error', 'Error Tenant Not Found ' . $e->getMessage());
+        }
+        
+        return $this->render('tenant/processtenant.html.twig', ['data' => $data]);
     }
 } 

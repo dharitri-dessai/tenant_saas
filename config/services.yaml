@@ -37,17 +37,18 @@ services:
 
     App\Service\Tenant\TenantConfigService:
         public: true
-        autowire: true
-        autoconfigure: true
 
     App\Service\Tenant\AnalyticsService:
         public: true
-        autowire: true
-        autoconfigure: true
 
     App\Service\Tenant\TenantServiceSubscriber:
         arguments:
             $locator: '@service_container'
+
+    App\Service\Payment\StripePaymentService:
+        arguments:
+            $httpClient: '@http_client'
+            $stripeApiKey: '%env(STRIPE_API_KEY)%'
 
     
 

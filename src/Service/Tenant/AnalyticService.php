@@ -4,13 +4,12 @@ namespace App\Service\Tenant;
 
 class AnalyticsService
 {
-    public function processData(array $config): void
-    {
+    public function processData(array $config): array
+    {      
         // Example: Process tenant-specific data
-        echo sprintf(
-            "Processing data for %s with color %s\n",
-            $config['name'],
-            $config['color']
-        );
+        return [
+            'name' => $config['name'],
+            'color' => $config['color']
+        ];
     }
 }
