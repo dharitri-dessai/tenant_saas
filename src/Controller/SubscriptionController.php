@@ -47,6 +47,7 @@ class SubscriptionController extends AbstractController
             }
         }
 
+        dump($form->createView());
         return $this->render('subscription/new.html.twig', [
             'form' => $form->createView(),
         ]);
