@@ -148,7 +148,7 @@ class TenantController extends AbstractController
 
         return $this->render('tenant/edit.html.twig', [
             'tenant' => $tenant,
-            'form' => $form,
+            'form' => $form->createView(),
             'tenantAdminEmail' => $tenantAdmin->getEmail(),
         ]);
     }

@@ -14,7 +14,7 @@ class Subscription
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\OneToOne(inversedBy: 'subscriptions')]
+    #[ORM\OneToOne(inversedBy: 'subscription')]
     #[ORM\JoinColumn(nullable: true)]
     private ?Tenant $tenant = null;
 

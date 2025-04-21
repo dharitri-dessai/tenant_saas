@@ -185,5 +185,5 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $this->resetTokenExpiresAt = $resetTokenExpiresAt;
         return $this;
-    }
+    }    
 } 
