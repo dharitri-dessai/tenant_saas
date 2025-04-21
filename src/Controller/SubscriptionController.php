@@ -22,7 +22,7 @@ class SubscriptionController extends AbstractController
     }
 
     #[Route('/new', name: 'app_subscription_new', methods: ['GET', 'POST'])]
-    #[IsGranted('ROLE_TENANT_ADMIN')]
+    #[IsGranted(new Expression('is_granted("ROLE_ADMIN") or is_granted("ROLE_TENANT_ADMIN")'))]
     public function new(Request $request): Response
     {
         $form = $this->createForm(SubscriptionType::class);

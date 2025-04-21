@@ -13,6 +13,7 @@ use Doctrine\ORM\Events;
 use App\Service\AuditLoggerService;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Utils\Constants;
 
 #[AsDoctrineListener(event: Events::postPersist, priority: 0, connection: 'default')]
 #[AsDoctrineListener(event: Events::postRemove, priority: 0, connection: 'default')]
@@ -57,7 +58,7 @@ class AuditEventListener
         $entityClass = get_class($entity);
 
         // If its audit class , ignore 
-        if ($entityClass === 'App\Entity\AuditLog') {
+        if ($entityClass === Constants::AUDITLOG_ENTITY_CLASS) {
             return;
         }
 
