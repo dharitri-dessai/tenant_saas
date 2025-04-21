@@ -11,51 +11,53 @@ use Doctrine\ORM\Event\PostUpdateEventArgs;
 use Doctrine\ORM\Event\PreRemoveEventArgs;
 use Doctrine\ORM\Events;
 use App\Service\AuditLoggerService;
-use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Doctrine\ORM\EntityManagerInterface;
 
 #[AsDoctrineListener(event: Events::postPersist, priority: 0, connection: 'default')]
 #[AsDoctrineListener(event: Events::postRemove, priority: 0, connection: 'default')]
 #[AsDoctrineListener(event: Events::postUpdate, priority: 0, connection: 'default')]
-#[AsDoctrineListener(event: Events::preRemove, priority: 0, connection: 'default')]
+// #[AsDoctrineListener(event: Events::preRemove, priority: 0, connection: 'default')]
 class AuditEventListener
 {
-    public function __construct(private AuditLoggerService $logger, private NormalizerInterface $normalizer, private $removals = []) {}
+    public function __construct(private AuditLoggerService $logger, private ObjectNormalizer $normalizer, private $removals = []) {}
 
     public function postPersist(PostPersistEventArgs $args): void 
     {
-        $entity = $args->getObject();
-        $entityManager = $args->getObjectManager();
-        $this->logger->buildLoggingParameters($entity, 'insert', $entityManager);
+         $entity = $args->getObject();
+         $entityManager = $args->getObjectManager();
+         $this->buildLoggingParameters($entity, 'insert', $entityManager);
     }
 
     public function postRemove(PostRemoveEventArgs $args): void 
     {
         $entity = $args->getObject();
         $entityManager = $args->getObjectManager();
-        $this->logger->buildLoggingParameters($entity, 'delete', $entityManager);
+        $this->buildLoggingParameters($entity, 'delete', $entityManager);
     }
 
     public function postUpdate(PostUpdateEventArgs $args): void 
     {
         $entity = $args->getObject();
         $entityManager = $args->getObjectManager();
-        $this->logger->buildLoggingParameters($entity, 'update', $entityManager);
+        $this->buildLoggingParameters($entity, 'update', $entityManager);
     }
 
     public function preRemove(PreRemoveEventArgs $args): void 
     {
         $entity = $args->getObject();
-        $prevEntity = $this->normalizer->normalize($entity);
-        $this->logger->addPreviousEntity($prevEntity);
+        $prevEntity = $this->normalizer->normalize($entity, null, [
+            ObjectNormalizer::IGNORED_ATTRIBUTES => ['users', 'subscription']
+        ]);
+        $this->removals[] = $prevEntity;
     }
 
-    public function buildLoggingParameters($entity, $action,  EntityManagerInterface $em) : void 
+    public function buildLoggingParameters($entity, string $action,  EntityManagerInterface $em) : void 
     {
         $entityClass = get_class($entity);
 
         // If its audit class , ignore 
-        if ($entityClass === 'App\Entity]AuditLog') {
+        if ($entityClass === 'App\Entity\AuditLog') {
             return;
         }
 
@@ -66,7 +68,12 @@ class AuditEventListener
 
         switch ($action) {
             case 'insert':
-                $entityData = $this->normalizer->normalize($entity);
+                $entityData = $this->normalizer->normalize($entity, null, [
+                    // ObjectNormalizer::IGNORED_ATTRIBUTES => ['users', 'subscription'],
+                    'circular_reference_handler' => function ($object) {
+                        return $object->getId(); // Return the ID of the object to break the circular reference
+                    },
+                ]);
             break;
 
             case 'update':
@@ -87,7 +94,7 @@ class AuditEventListener
 
             default:
                 throw new \InvalidArgumentException("Unsupported action: $action");
-
+            break;
         }
         
         $this->logger->log($entityType, $entityId, $action, $entityData);
