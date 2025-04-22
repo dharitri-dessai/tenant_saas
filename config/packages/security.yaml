@@ -30,10 +30,23 @@ security:
             remember_me:
                 secret: '%kernel.secret%'
                 lifetime: 604800 # 1 week in seconds
+            # oauth:
+            #     resource_owners:
+            #         google: "/connect/google/check"
+            #     login_path: "/connect/google"
+            #     check_path: "/connect/google/check"
+            #     default_target_path: "/"
+            #     failure_path: "/login"
+            # logout:
+            #     path: "/logout"
+            #     target: "/"
+    access_control:
+        - { path: ^/connect/google, roles: PUBLIC_ACCESS }
+        - { path: ^/connect/google/check, roles: PUBLIC_ACCESS }
 
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
-    access_control:
+    # access_control:
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/register, roles: PUBLIC_ACCESS }
         - { path: ^/super-admin, roles: ROLE_SUPER_ADMIN }
