@@ -29,7 +29,7 @@ services:
     # Using Cuastom Tags 
     App\Service\Formatter\UppercaseFormatter:
         tags:
-            - { name: app.data_formatter }
+            - { name: app. }
 
     App\Service\Formatter\PrefixFormatter:
         tags:

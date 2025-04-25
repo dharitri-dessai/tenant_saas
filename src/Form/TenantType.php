@@ -17,7 +17,6 @@ class TenantType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        dump($options['data']);
         $builder
             ->add('name', TextType::class, [
                 'constraints' => [
