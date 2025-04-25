@@ -29,8 +29,23 @@ class RegistrationController extends AbstractController
         $form = $this->createForm(RegistrationFormType::class, $user);
         $form->handleRequest($request);
 
+        dump('dddddddd');
+
+        // if ($form->isSubmitted() && !$form->isValid()) {
+        //     foreach ($form->getErrors(true) as $error) {
+        //         dump($error->getMessage()); // Get the error message
+        //         dump($error->getOrigin()?->getName()); // Get the field name where the error occurred (use null-safe operator)
+        //     }
+        //     //die; // Stop execution to inspect the errors
+        // }
+
+        dump($form->isSubmitted());
+        dump('fffffffff');
+        dump($form->isValid());
+
         if ($form->isSubmitted() && $form->isValid()) {
             try {
+                dump('dddddddd1111');
                 // Get form data
                 $email = $form->get('email')->getData();
                 $plainPassword = $form->get('plainPassword')->getData();
@@ -56,10 +71,12 @@ class RegistrationController extends AbstractController
             } catch (CustomUserMessageAuthenticationException $e) {
                 $this->addFlash('error', $e->getMessage());
             } catch (\Exception $e) {
+                dump('dddddddd222222222');
+                
                 $this->addFlash('error', 'An error occurred during registration. Please try again.'.$e->getMessage());
             }
         }
-
+        dump('dddddddd3333333333');
         return $this->render('registration/register.html.twig', [
             'registrationForm' => $form->createView(),
         ]);

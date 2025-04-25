@@ -12,7 +12,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 
 class GoogleController extends AbstractController 
 {
@@ -33,43 +33,47 @@ class GoogleController extends AbstractController
     public function connectCheck(Request $request, ClientRegistry $clientRegistry): Response 
     {
         $client = $clientRegistry->getClient('google');
-        $googleUser = $client->fetchUser();
+        try {
+            $googleUser = $client->fetchUser();
 
-        // Check if the user exists in your database
-        $email = $googleUser->getEmail();
-        $name = $googleUser->getName();
-        $password = '123456';
+            // Check if the user exists in your database
+            $email = $googleUser->getEmail();
+            $name = $googleUser->getName();
+            $password = '123456';
 
-        $newUser = new User();
-        $existingUser = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
+            $newUser = new User();
+            $existingUser = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
 
-        if ($existingUser) {
+            if ($existingUser) {
+                // Log the user in
+                $this->tokenStorage->setToken(
+                    new UsernamePasswordToken($existingUser, 'main', $existingUser->getRoles())
+                );
+
+                // Redirect dashboard page
+                return $this->redirectToRoute('app_dashboard');
+            }
+
+            $newUser->setEmail($email);
+            $newUser->setRoles(['ROLE_USER']);
+            $newUser->setFirstName($name);
+            $newUser->setLastName($name);
+            // $newUser->setGoogleId($user->getId());
+            $hashedPassword = $this->passwordHasher->hashPassword($newUser, $password);
+            $newUser->setPassword($hashedPassword);
+
+            $this->entityManager->persist($newUser);
+            $this->entityManager->flush();
+
             // Log the user in
             $this->tokenStorage->setToken(
-                new UsernamePasswordToken($existingUser, 'main', $existingUser->getRoles())
+                new UsernamePasswordToken($newUser, 'main', $newUser->getRoles())
             );
-
-            // Redirect dashboard page
-            return $this->redirectToRoute('app_dashboard');
+        } catch (\Exception $e) {
+            $this->addFlash('error', 'An error occurred while logging: ' . $e->getMessage());
+            // Redirect login page
+            return $this->redirectToRoute('app_login');
         }
-
-        $newUser->setEmail($email);
-        $newUser->setRoles(['ROLE_USER']);
-        $newUser->setFirstName($name);
-        $newUser->setLastName($name);
-        // $newUser->setGoogleId($user->getId());
-        $hashedPassword = $this->passwordHasher->hashPassword($newUser, $password);
-        $newUser->setPassword($hashedPassword);
-
-        $this->entityManager->persist($newUser);
-        $this->entityManager->flush();
-
-        $existingUser = $newUser;
-
-        // Log the user in
-        $this->tokenStorage->setToken(
-             new UsernamePasswordToken($existingUser, 'main', $existingUser->getRoles())
-        );
 
         // Redirect dashboard page
         return $this->redirectToRoute('app_dashboard');
