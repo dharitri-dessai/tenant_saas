@@ -1,19 +1,26 @@
 framework:
-    messenger:
-        failure_transport: failed
-
+    messenger: 
         transports:
             # https://symfony.com/doc/current/messenger.html#transport-configuration
-            async:
+            subscription_email:
                 dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                failure_transport: subscription_email_failed
                 options:
                     use_notify: true
                     check_delayed_interval: 60000
                 retry_strategy:
                     max_retries: 3
+                    delay: 1000
                     multiplier: 2
-            failed: 'doctrine://default?queue_name=failed'
-            # sync: 'sync://'
+                    max_delay: 0
+
+            subscription_email_failed:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                options:
+                    exchange:
+                        name: subscription_email_failed
+                    queues:
+                        subscription_email_failed: ~
 
         default_bus: messenger.bus.default
 
@@ -21,9 +28,10 @@ framework:
             messenger.bus.default: []
 
         routing:
-            Symfony\Component\Mailer\Messenger\SendEmailMessage: async
-            Symfony\Component\Notifier\Message\ChatMessage: async
-            Symfony\Component\Notifier\Message\SmsMessage: async
+            # Symfony\Component\Mailer\Messenger\SendEmailMessage: async
+            # Symfony\Component\Notifier\Message\ChatMessage: async
+            # Symfony\Component\Notifier\Message\SmsMessage: async
+            
 
             # Route your messages to the transports
-            # 'App\Message\YourMessage': async
+            App\Message\TenantSubscriptionEmailMessage: subscription_email

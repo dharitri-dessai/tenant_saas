@@ -9,6 +9,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Dharitri\MyBundle\Service\RandomNumberService;
 
 class ProductController extends AbstractController
 {
@@ -57,4 +58,15 @@ class ProductController extends AbstractController
             'form' => $$form->createView(),
         ]);
     }
+
+    #[Route('/product/random/number/{max}', name: 'app_random_number')]
+    public function showRandomNumber(int $max, RandomNumberService $randomNumberService): Response
+    {
+        $randomNumber = $randomNumberService->generate($max);
+
+        return new Response(
+            '<html><body>Random Number: ' . $randomNumber . '</body></html>'
+        );
+    }
+
 }
