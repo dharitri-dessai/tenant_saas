@@ -29,7 +29,7 @@ services:
     # Using Cuastom Tags 
     App\Service\Formatter\UppercaseFormatter:
         tags:
-            - { name: app. }
+            - { name: app.data_formatter }
 
     App\Service\Formatter\PrefixFormatter:
         tags:
@@ -49,7 +49,6 @@ services:
         arguments:
             $httpClient: '@http_client'
             $stripeApiKey: '%env(STRIPE_API_KEY)%'
-
     
 
 

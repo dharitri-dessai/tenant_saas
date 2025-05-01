@@ -1,4 +1,7 @@
 {
+    "dharitri/my_bundle": {
+        "version": "dev-main"
+    },
     "doctrine/doctrine-bundle": {
         "version": "2.13",
         "recipe": {
