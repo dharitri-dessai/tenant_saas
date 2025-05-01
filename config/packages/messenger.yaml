@@ -5,22 +5,15 @@ framework:
             subscription_email:
                 dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
                 failure_transport: subscription_email_failed
-                options:
-                    use_notify: true
-                    check_delayed_interval: 60000
                 retry_strategy:
                     max_retries: 3
                     delay: 1000
                     multiplier: 2
                     max_delay: 0
-
+                # options:
             subscription_email_failed:
                 dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
-                options:
-                    exchange:
-                        name: subscription_email_failed
-                    queues:
-                        subscription_email_failed: ~
+                # options:
 
         default_bus: messenger.bus.default
 

@@ -101,6 +101,9 @@ class SubscriptionController extends AbstractController
             try {
                 $this->subscriptionService->updateSubscription($subscription, $data['planId'], $data['status']);
                 $this->addFlash('success', 'Subscription updated successfully!');
+
+                $this->subscriptionService->dispatchMessage($user->getTenant()?->getId());
+
                 return $this->redirectToRoute('app_subscription_show', ['id' => $subscription->getId()]);
             } catch (\Exception $e) {
                 $this->addFlash('error', 'Error updating subscription: ' . $e->getMessage());
