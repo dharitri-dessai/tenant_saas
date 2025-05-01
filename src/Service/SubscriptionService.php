@@ -6,12 +6,15 @@ use App\Entity\Subscription;
 use App\Entity\Tenant;
 use App\Repository\SubscriptionRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Messenger\MessageBusInterface;
+use App\Message\TenantSubscriptionEmailMessage;
 
 class SubscriptionService
 {
     public function __construct(
         private EntityManagerInterface $entityManager,
         private SubscriptionRepository $subscriptionRepository,
+        private MessageBusInterface $bus
     ) {
     }
 
@@ -58,4 +61,12 @@ class SubscriptionService
             throw new \RuntimeException('Failed to update subscription: ' . $e->getMessage());
         }
     }
+
+    public function dispatchMessage(int $tenantId)
+    {
+        // will cause the SmsNotificationHandler to be called
+        $this->bus->dispatch(new TenantSubscriptionEmailMessage($tenantId));
+
+    }
+
 } 
